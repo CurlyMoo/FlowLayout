@@ -19,6 +19,7 @@
 <resources>
 	<declare-styleable name="FlowLayout">
 		<attr name="android:gravity" />
+		<attr name="maxRows" format="integer" />
 	</declare-styleable>
 	<declare-styleable name="FlowLayout_Layout">
 		<attr name="android:layout_gravity" />

@@ -36,6 +36,7 @@ import java.util.List;
 public class FlowLayout extends ViewGroup {
 
 	private int mGravity = Gravity.START | Gravity.TOP;
+	private int mMaxRows = 0;
 
 	public FlowLayout(Context context) {
 		super(context);
@@ -55,6 +56,8 @@ public class FlowLayout extends ViewGroup {
 		if(index > 0) {
 			setGravity(index);
 		}
+
+		mMaxRows = a.getInt(R.styleable.FlowLayout_maxRows, 0);
 
 		a.recycle();
 	}
@@ -225,58 +228,115 @@ public class FlowLayout extends ViewGroup {
 		int width = 0;
 		int height = 0;
 
-		int lineWidth = 0;
-		int lineHeight = 0;
+		// firs time there is no stretch factor per line
+		float[] lineFactor = null;
 
-		for(int i = 0; i < getChildCount(); i++) {
+		// second loop executes only if there is more rows than maxRows
+		for(int j = 0; j < 2; j++) {
+			width = 0;
+			height = 0;
 
-			View child = getChildAt(i);
+			int lineWidth = 0;
+			int lineHeight = 0;
 
-			if(child.getVisibility() == View.GONE) {
-				continue;
-			}
+			int lines = 0;
 
-			LayoutParams lp = (LayoutParams) child.getLayoutParams();
+			// width of all children
+			int sumChildWidth = 0;
 
-			int childWidthMode = MeasureSpec.AT_MOST;
-			int childWidthSize = sizeWidth;
+			for(int i = 0; i < getChildCount(); i++) {
 
-			int childHeightMode = MeasureSpec.AT_MOST;
-			int childHeightSize = sizeHeight;
+				View child = getChildAt(i);
 
-			if(lp.width == LayoutParams.MATCH_PARENT) {
-				childWidthMode = MeasureSpec.EXACTLY;
-				childWidthSize -= lp.leftMargin + lp.rightMargin;
-			} else if(lp.width >= 0) {
-				childWidthMode = MeasureSpec.EXACTLY;
-				childWidthSize = lp.width;
-			}
+				if(child.getVisibility() == View.GONE) {
+					continue;
+				}
 
-			if(lp.height >= 0) {
-				childHeightMode = MeasureSpec.EXACTLY;
-				childHeightSize = lp.height;
-			}
+				LayoutParams lp = (LayoutParams) child.getLayoutParams();
 
-			child.measure(
-					MeasureSpec.makeMeasureSpec(childWidthSize, childWidthMode),
-					MeasureSpec.makeMeasureSpec(childHeightSize, childHeightMode)
-			);
+				int childWidthMode = MeasureSpec.AT_MOST;
+				int childWidthSize = sizeWidth;
 
-			int childWidth = child.getMeasuredWidth() + lp.leftMargin + lp.rightMargin;
+				int childHeightMode = MeasureSpec.AT_MOST;
+				int childHeightSize = sizeHeight;
 
-			if(lineWidth + childWidth > sizeWidth) {
+				if(lp.width == LayoutParams.MATCH_PARENT) {
+					childWidthMode = MeasureSpec.EXACTLY;
+					childWidthSize -= lp.leftMargin + lp.rightMargin;
+				} else if(lp.width >= 0) {
+					childWidthMode = MeasureSpec.EXACTLY;
+					childWidthSize = lp.width;
+				}
 
-				width = Math.max(width, lineWidth);
-				lineWidth = 0;
+				if(lp.height >= 0) {
+					childHeightMode = MeasureSpec.EXACTLY;
+					childHeightSize = lp.height;
+				}
 
-				height += lineHeight;
-				lineHeight = 0;
+				if(lineFactor != null) {
+					childWidthSize = (int) (childWidthSize * lineFactor[0]);
+				}
 
-			} else {
+				child.measure(
+						MeasureSpec.makeMeasureSpec(childWidthSize, childWidthMode),
+						MeasureSpec.makeMeasureSpec(childHeightSize, childHeightMode)
+				);
+
+				int childWidth = child.getMeasuredWidth() + lp.leftMargin + lp.rightMargin;
+				sumChildWidth += childWidth;
+
+				if(lineWidth + childWidth > sizeWidth) {
+
+					width = Math.max(width, lineWidth);
+					lineWidth = 0;
+
+					height += lineHeight;
+					lineHeight = 0;
+					lines++;
+
+				}
+
 				lineWidth += childWidth;
 				lineHeight = Math.max(lineHeight, child.getMeasuredHeight() + lp.topMargin + lp.bottomMargin);
+
 			}
 
+			// if maxRows is not set or number of rows is less then maxRows
+			if(mMaxRows == 0 || mMaxRows > lines) {
+				break;
+			}
+
+			lineFactor = new float[mMaxRows];
+
+			// calculate average child width per line
+			int widthPerLine = sumChildWidth / mMaxRows;
+
+			lines = 0;
+			lineWidth = 0;
+
+
+			// calculate stretch factor for every line
+			for(int i = 0; i < getChildCount(); i++) {
+				View child = getChildAt(i);
+
+				int childWidth = child.getMeasuredWidth();
+
+				// brake wil be before or after this child
+				if(lineWidth + childWidth > widthPerLine || i == getChildCount() - 1) {
+					// child will be on this row
+					if(widthPerLine - lineWidth > childWidth / 2) {
+						lineWidth += childWidth;
+					// child will be in next row
+					}
+					lineFactor[lines] = 1.f * sizeWidth / lineWidth;
+					lines++;
+
+					lineWidth = 0;
+
+				}
+
+				lineWidth += childWidth;
+			}
 		}
 
 		setMeasuredDimension(

@@ -17,10 +17,11 @@
   -->
 
 <si.solarb.flowlayout.FlowLayout xmlns:android="http://schemas.android.com/apk/res/android"
-		xmlns:flowlayout="http://schemas.android.com/apk/res/si.solarb.flowlayout"
+		xmlns:flowlayout="http://schemas.android.com/apk/res/si.solarb.flowlayout.example"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:gravity="start|top">
+		android:gravity="start|top"
+		flowlayout:maxRows="2">
 
 	<Button
 			android:layout_width="wrap_content"
@@ -42,7 +43,6 @@
 	<Button
 			android:layout_width="wrap_content"
 			android:layout_height="match_parent"
-			android:layout_margin="10dp"
 			android:text="adipisicing" />
 
 	<Button
