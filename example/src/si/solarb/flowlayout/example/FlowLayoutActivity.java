@@ -55,6 +55,7 @@ public class FlowLayoutActivity extends ListActivity {
 
 		private Item[] mItems = {
 				new Item<BasicActivity>(R.string.activity_basic, BasicActivity.class),
+				new Item<MaxRowsActivity>(R.string.activity_max_rows, MaxRowsActivity.class),
 				new Item<AllInOneActivity>(R.string.activity_all_in_one, AllInOneActivity.class)
 		};
 

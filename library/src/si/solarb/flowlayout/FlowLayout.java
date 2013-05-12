@@ -274,7 +274,7 @@ public class FlowLayout extends ViewGroup {
 				}
 
 				if(lineFactor != null) {
-					childWidthSize = (int) (childWidthSize * lineFactor[0]);
+					childWidthSize = (int) (child.getMeasuredWidth() * lineFactor[0]);
 				}
 
 				child.measure(
@@ -321,21 +321,21 @@ public class FlowLayout extends ViewGroup {
 
 				int childWidth = child.getMeasuredWidth();
 
+				lineWidth += childWidth;
+
 				// brake wil be before or after this child
-				if(lineWidth + childWidth > widthPerLine || i == getChildCount() - 1) {
+				if(lineWidth >= widthPerLine || i == getChildCount() - 1) {
 					// child will be on this row
-					if(widthPerLine - lineWidth > childWidth / 2) {
-						lineWidth += childWidth;
+//					if(widthPerLine - lineWidth > childWidth / 2) {
+//						lineWidth += childWidth;
 					// child will be in next row
-					}
+//					}
 					lineFactor[lines] = 1.f * sizeWidth / lineWidth;
 					lines++;
 
 					lineWidth = 0;
 
 				}
-
-				lineWidth += childWidth;
 			}
 		}
 

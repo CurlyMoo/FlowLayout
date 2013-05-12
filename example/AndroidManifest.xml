@@ -30,6 +30,10 @@
 			android:name=".AllInOneActivity"
 			android:label="@string/activity_all_in_one" />
 
+		<activity
+			android:name=".MaxRowsActivity"
+			android:label="@string/activity_max_rows" />
+
     </application>
 
 </manifest>
